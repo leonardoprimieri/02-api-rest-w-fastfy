@@ -1,9 +1,15 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
 import { app } from '../app'
 import { TransactionTypesEnum } from '../enums/transaction-types.enum'
+import { execSync } from 'node:child_process'
 
 describe('Transactions Service', () => {
+  beforeEach(() => {
+    execSync('npm run knex migrate:rollback --all')
+    execSync('npm run knex migrate:latest')
+  })
+
   beforeAll(async () => {
     await app.ready()
   })
