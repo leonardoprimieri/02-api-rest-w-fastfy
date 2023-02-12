@@ -41,6 +41,16 @@ export async function transactionsRoutes(app: FastifyInstance) {
       request.body,
     )
 
+    let sessionId = request.cookies.sessionId
+
+    if (!sessionId) {
+      sessionId = randomUUID()
+      reply.cookie('session_id', sessionId, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
+      })
+    }
+
     const handleAmount = () => {
       return type === TransactionTypesEnum.CREDIT ? amount : amount * -1
     }
@@ -49,6 +59,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
       id: randomUUID(),
       amount: handleAmount(),
       title,
+      session_id: sessionId,
     })
 
     return reply.status(201).send()
