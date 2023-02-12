@@ -12,11 +12,12 @@ export async function transactionsRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExistsMiddleware],
     },
     async (request) => {
-      const { session_id: sessionId } = request.cookies
+      const { sessionId } = request.cookies
 
       const transactions = await knex('transactions')
         .select()
         .where('session_id', sessionId)
+        .select()
       return { transactions }
     },
   )
@@ -27,7 +28,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExistsMiddleware],
     },
     async (request) => {
-      const { session_id: sessionId } = request.cookies
+      const { sessionId } = request.cookies
       const getTransactionParamsSchema = z.object({
         id: z.string().uuid(),
       })
@@ -51,7 +52,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExistsMiddleware],
     },
     async (request) => {
-      const { session_id: sessionId } = request.cookies
+      const { sessionId } = request.cookies
 
       const summary = await knex('transactions')
         .sum('amount', { as: 'amount' })
@@ -77,7 +78,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
 
     if (!sessionId) {
       sessionId = randomUUID()
-      reply.cookie('session_id', sessionId, {
+      reply.cookie('sessionId', sessionId, {
         path: '/',
         maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
       })

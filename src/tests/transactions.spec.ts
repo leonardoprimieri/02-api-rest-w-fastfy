@@ -53,25 +53,34 @@ describe('Transactions Service', () => {
     ])
   })
 
-  it('should be able to list summary', async () => {
+  it.only('should be able to list summary', async () => {
     const createTransactionResponse = await request(app.server)
       .post('/transactions')
       .send({
-        title: 'New Transaction',
+        title: 'Credit Transaction',
         amount: 500,
         type: TransactionTypesEnum.CREDIT,
       })
 
     const cookies = createTransactionResponse.get('Set-Cookie')
 
+    await request(app.server)
+      .post('/transactions')
+      .set('Cookie', cookies)
+      .send({
+        title: 'Debit Transaction',
+        amount: 500,
+        type: TransactionTypesEnum.DEBIT,
+      })
+
     const listSummaryResponse = await request(app.server)
       .get('/transactions/summary')
       .set('Cookie', cookies)
 
-    expect(listSummaryResponse.body.summary.amount).toBe(500)
+    expect(listSummaryResponse.body.summary.amount).toBe(0)
   })
 
-  it.only('should be able to see transactions details by id', async () => {
+  it('should be able to see transactions details by id', async () => {
     const createTransactionResponse = await request(app.server)
       .post('/transactions')
       .send({
