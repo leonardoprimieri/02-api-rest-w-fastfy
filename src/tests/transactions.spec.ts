@@ -52,4 +52,54 @@ describe('Transactions Service', () => {
       }),
     ])
   })
+
+  it('should be able to list summary', async () => {
+    const createTransactionResponse = await request(app.server)
+      .post('/transactions')
+      .send({
+        title: 'New Transaction',
+        amount: 500,
+        type: TransactionTypesEnum.CREDIT,
+      })
+
+    const cookies = createTransactionResponse.get('Set-Cookie')
+
+    const listSummaryResponse = await request(app.server)
+      .get('/transactions/summary')
+      .set('Cookie', cookies)
+
+    expect(listSummaryResponse.body.summary.amount).toBe(500)
+  })
+
+  it.only('should be able to see transactions details by id', async () => {
+    const createTransactionResponse = await request(app.server)
+      .post('/transactions')
+      .send({
+        title: 'New Transaction',
+        amount: 500,
+        type: TransactionTypesEnum.CREDIT,
+      })
+
+    const cookies = createTransactionResponse.get('Set-Cookie')
+
+    const listTransactionsResponse = await request(app.server)
+      .get('/transactions')
+      .set('Cookie', cookies)
+      .expect(200)
+
+    const transactionId = listTransactionsResponse.body.transactions[0].id
+
+    const listTransactionByIdResponse = await request(app.server)
+      .get(`/transactions/${transactionId}`)
+      .set('Cookie', cookies)
+      .expect(200)
+
+    expect(listTransactionByIdResponse.body.transaction).toEqual(
+      expect.objectContaining({
+        title: 'New Transaction',
+        amount: 500,
+        id: transactionId,
+      }),
+    )
+  })
 })
